@@ -81,7 +81,7 @@ h1{color:var(--ink)}
 <label>Full name</label><input type="text" id="nm" maxlength="40" placeholder="e.g. Ama Mensah">
 <label>Position / Organisation</label><input type="text" id="ps" maxlength="70" placeholder="e.g. CEO, Anoff Holdings">
 <label>Zoom</label><input type="range" id="zm" min="1" max="3" step="0.01" value="1">
-<button id="dl" disabled>Download flyer</button><div id="m"></div>
+<button id="dl" disabled>Save / Download flyer</button><div id="m"></div>
 </div>
 <div class="c"><div class="v"><canvas id="cv" width="1080" height="1350"></canvas></div>
 <div class="h">Drag the photo inside the frame to reposition it.</div></div>
@@ -122,5 +122,10 @@ if(document.fonts){Promise.all([700,800,600].map(w=>document.fonts.load(w+' 30px
 let dr=null;cv.onpointerdown=e=>{if(!img)return;dr={px:e.clientX,py:e.clientY,ox,oy};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'};
 cv.onpointermove=e=>{if(!dr)return;const k=1080/cv.getBoundingClientRect().width;ox=dr.ox+(e.clientX-dr.px)*k;oy=dr.oy+(e.clientY-dr.py)*k;draw()};
 cv.onpointerup=cv.onpointercancel=()=>{dr=null;cv.style.cursor='grab'};
-$('dl').onclick=()=>{const m=$('m');m.textContent='';cv.toBlob(b=>{const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='Impact-Africa-Summit-Attending.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);m.textContent='Downloaded! Now share it and tag #ImpactAfricaSummit. If nothing happened, long-press the flyer preview and choose Save Image.'},'image/png')};
+$('dl').onclick=()=>{const m=$('m');m.textContent='';cv.toBlob(async b=>{
+const name='Impact-Africa-Summit-Attending.png';
+const phone=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
+if(phone&&navigator.canShare){try{const f=new File([b],name,{type:'image/png'});if(navigator.canShare({files:[f]})){await navigator.share({files:[f],title:"I'll be attending the Impact Africa Summit"});m.textContent='Done! Now share it and tag #ImpactAfricaSummit.';return}}catch(e){if(e&&e.name==='AbortError'){m.textContent='';return}}}
+const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+m.textContent='Downloaded! Now share it and tag #ImpactAfricaSummit. If nothing happened, long-press the flyer preview and choose Save Image.'},'image/png')};
 </script></body></html>
